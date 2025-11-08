@@ -35,7 +35,7 @@ if ($row) {
   // If logged-in user is the author → show edit/delete options
   if (isset($_SESSION['id']) && $_SESSION['id'] == $row['author_id']) {
     echo '
-    <a href="./editBlog.php?id=' . $row['id'] . '&author_id=' . $row['author_id'] . '" class="btn btn-primary">Edit</a>
+    <a href="./editBlog.php?id=' . $row['id'] . '" class="btn btn-primary">Edit</a>
     <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal' . $row['id'] . '">Delete Post</button>
 
     <!-- Delete Confirmation Modal -->
@@ -51,7 +51,7 @@ if ($row) {
           </div>
           <div class="modal-footer justify-content-center border-0">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <a href="./deleteProcess.php?id=' . $row['id'] . '&author_id=' . $row['author_id'] . '" class="btn btn-danger">Delete</a>
+            <a href="./deleteProcess.php?id=' . $row['id'] . '" class="btn btn-danger">Delete</a>
           </div>
         </div>
       </div>

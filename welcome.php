@@ -246,8 +246,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
               <h5 class="card-title text-primary mb-2">' . htmlspecialchars($row['title']) . '</h5>
               <p class="card-text text-muted flex-grow-1">' . $short_content . '</p>
               <div class="mt-3 d-flex flex-wrap gap-2">
-                <a href="./editBlog.php?id=' . $row['id'] . '&author_id=' . $row['author_id'] . '" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="./showBlog.php?id=' . $row['id'] . '&author_id=' . $row['author_id'] . '" class="btn btn-sm btn-primary">Read More</a>
+                <a href="./editBlog.php?id=' . $row['id'] . '" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="./showBlog.php?id=' . $row['id'] . '" class="btn btn-sm btn-primary">Read More</a>
                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal' . $row['id'] . '">Delete</button>
               </div>
             </div>
