@@ -9,13 +9,6 @@ if (!isset($_SESSION['id'])) {
   exit;
 }
 
-if (isset($_SESSION['id']) && ($_SESSION['id'] != $_GET['author_id'])) {
-  header("location:index.php");
-  $_SESSION['flash_message'] = "You are not Owner!";
-  $_SESSION['flash_message_type'] = "danger";
-  exit;
-}
-
 include("./partials/_dbconnect.php");
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
@@ -23,21 +16,21 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
   $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_SPECIAL_CHARS);
   $content = $_POST["content"];
   $content = mysqli_real_escape_string($conn, $content);
-  $id = (int) $_GET["id"];
-  $author_id = (int) $_GET["author_id"];
+  $id = $_GET["id"];
+  $author_id = $_SESSION['id'];
 
   $id = $_GET["id"];
   $sql = "UPDATE `blog` 
         SET `title`='$title',
             `content`='$content'
-        WHERE `id` = $id";
+        WHERE `id` = $id AND `author_id` = $author_id";
 
   $result = mysqli_query($conn, $sql);
 
   if ($result) {
-    header("location:showBlog.php?id=" . $id . "&author_id=" . $author_id);
+    header("location:showBlog.php?id=" . $id);
   } else {
-    header("location:editBlog.php?id=" . $id . "&author_id=" . $author_id);
+    header("location:editBlog.php?id=" . $id);
   }
 }
 
@@ -56,21 +49,37 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
   <?php include('./partials/_nav.php') ?>
   <?php
 
-  $sql = "SELECT * from blog where id = " . $_GET["id"];
-  $result = mysqli_query($conn, $sql);
+  try {
+    $sql = "SELECT * FROM `blog` WHERE `id` = " . $_GET["id"] . " AND `author_id` = " . $_SESSION['id'];
+    $result = mysqli_query($conn, $sql);
+  } catch (\Throwable $th) {
+    header("location:index.php");
+    $_SESSION['flash_message'] = "You are not Owner!";
+    $_SESSION['flash_message_type'] = "danger";
+    exit;
+  }
   $row = mysqli_fetch_assoc($result);
 
   $id = $row['id'];
   $title = $row["title"];
   $author = $_SESSION['username'];
+  $author_id = $row['author_id'];
   $content = $row["content"];
+
+  if ($_SESSION['id'] != $author_id) {
+    header("location:index.php");
+    $_SESSION['flash_message'] = "You are not Owner!";
+    $_SESSION['flash_message_type'] = "danger";
+    exit;
+  }
 
   ?>
   <div class="container-fluid mt-3">
     <div class="card shadow-sm">
       <div class="card-body">
         <h3 class="card-title mb-4 text-center">Update Your Blog</h3>
-        <form action="./editBlog.php?id=<?= $id; ?>&author_id= <?= $row['author_id'] ?>" method="post" id="blogForm" novalidate class="needs-validation">
+        <form action="./editBlog.php?id=<?= $id; ?>&author_id= <?= $row['author_id'] ?>" method="post" id="blogForm"
+          novalidate class="needs-validation">
           <div class="mb-3">
             <label for="author" class="form-label">Author</label>
             <input readonly value="<?php echo $author; ?>" type="text" class="form-control" name="author" id="author"
@@ -98,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
       </div>
     </div>
   </div>
-  
+
   <script src="js/script.js"></script>
 
   <!-- Include the Quill library -->
