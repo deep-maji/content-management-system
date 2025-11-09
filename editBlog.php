@@ -1,39 +1,64 @@
 <?php
-
 session_start();
 
 if (!isset($_SESSION['id'])) {
-  header("location:index.php");
-  $_SESSION['flash_message'] = "You are not loged in!";
+  $_SESSION['flash_message'] = "You are not logged in!";
   $_SESSION['flash_message_type'] = "danger";
+  header("location:index.php");
   exit;
 }
 
 include("./partials/_dbconnect.php");
-if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
-  $author = filter_input(INPUT_POST, "author", FILTER_SANITIZE_SPECIAL_CHARS);
+// Handle POST request (when user submits form)
+if ($_SERVER['REQUEST_METHOD'] === "POST") {
   $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_SPECIAL_CHARS);
   $content = $_POST["content"];
   $content = mysqli_real_escape_string($conn, $content);
-  $id = $_GET["id"];
-  $author_id = $_SESSION['id'];
+  $id = intval($_GET["id"]);
+  $author_id = intval($_SESSION['id']);
+  $updated_at = date('Y-m-d');
 
-  $id = $_GET["id"];
+  // Update the blog post and set update_at to current date
   $sql = "UPDATE `blog` 
-        SET `title`='$title',
-            `content`='$content'
-        WHERE `id` = $id AND `author_id` = $author_id";
+          SET `title` = '$title', 
+              `content` = '$content',
+              `update_at` = NOW()
+          WHERE `id` = $id AND `author_id` = $author_id";
 
   $result = mysqli_query($conn, $sql);
 
   if ($result) {
+    $_SESSION['flash_message'] = "Post updated successfully!";
+    $_SESSION['flash_message_type'] = "success";
     header("location:showBlog.php?id=" . $id);
+    exit;
   } else {
+    $_SESSION['flash_message'] = "Failed to update post: " . mysqli_error($conn);
+    $_SESSION['flash_message_type'] = "danger";
     header("location:editBlog.php?id=" . $id);
+    exit;
   }
 }
 
+// Fetch blog data for the form
+$id = intval($_GET["id"]);
+$author_id = intval($_SESSION['id']);
+
+$sql = "SELECT * FROM `blog` WHERE `id` = $id AND `author_id` = $author_id";
+$result = mysqli_query($conn, $sql);
+
+if (!$result || mysqli_num_rows($result) === 0) {
+  $_SESSION['flash_message'] = "You are not the owner or post not found!";
+  $_SESSION['flash_message_type'] = "danger";
+  header("location:index.php");
+  exit;
+}
+
+$row = mysqli_fetch_assoc($result);
+$title = htmlspecialchars($row["title"]);
+$content = $row["content"];
+$author = $_SESSION['username'];
 ?>
 
 <!DOCTYPE html>
@@ -41,65 +66,33 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
 <head>
   <?php include('./partials/_commonFiles.php'); ?>
-  <!-- Include stylesheet -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
 
 <body>
-  <?php include('./partials/_nav.php') ?>
-  <?php
+  <?php include('./partials/_nav.php'); ?>
 
-  try {
-    $sql = "SELECT * FROM `blog` WHERE `id` = " . $_GET["id"] . " AND `author_id` = " . $_SESSION['id'];
-    $result = mysqli_query($conn, $sql);
-  } catch (\Throwable $th) {
-    header("location:index.php");
-    $_SESSION['flash_message'] = "You are not Owner!";
-    $_SESSION['flash_message_type'] = "danger";
-    exit;
-  }
-  $row = mysqli_fetch_assoc($result);
-
-  $id = $row['id'];
-  $title = $row["title"];
-  $author = $_SESSION['username'];
-  $author_id = $row['author_id'];
-  $content = $row["content"];
-
-  if ($_SESSION['id'] != $author_id) {
-    header("location:index.php");
-    $_SESSION['flash_message'] = "You are not Owner!";
-    $_SESSION['flash_message_type'] = "danger";
-    exit;
-  }
-
-  ?>
   <div class="container-fluid mt-3">
     <div class="card shadow-sm">
       <div class="card-body">
         <h3 class="card-title mb-4 text-center">Update Your Blog</h3>
-        <form action="./editBlog.php?id=<?= $id; ?>&author_id= <?= $row['author_id'] ?>" method="post" id="blogForm"
-          novalidate class="needs-validation">
+        <form action="./editBlog.php?id=<?= $id ?>" method="post" id="blogForm" novalidate class="needs-validation">
           <div class="mb-3">
             <label for="author" class="form-label">Author</label>
-            <input readonly value="<?php echo $author; ?>" type="text" class="form-control" name="author" id="author"
-              placeholder="Enter author name" required>
+            <input readonly value="<?= $author ?>" type="text" class="form-control" id="author">
           </div>
 
           <div class="mb-3">
             <label for="title" class="form-label">Title</label>
-            <input value="<?php echo $title ?>" type="text" name="title" class="form-control" id="title"
-              placeholder="Enter post title" required>
+            <input value="<?= $title ?>" type="text" name="title" class="form-control" id="title" required>
           </div>
 
           <div class="mb-3">
             <label for="content" class="form-label">Content</label>
-            <!-- Create the editor container -->
-            <div id="editor">
-              <?php echo $content; ?>
-            </div>
+            <div id="editor"><?= $content ?></div>
             <input type="hidden" name="content" id="hiddenContent">
           </div>
+
           <div class="text-center">
             <button type="submit" class="btn btn-primary px-4">Update</button>
           </div>
@@ -109,53 +102,42 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
   </div>
 
   <script src="js/script.js"></script>
-
-  <!-- Include the Quill library -->
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
-  <!-- Initialize Quill editor -->
   <script>
-    const quill = new Quill("#editor", {
-      theme: "snow",
-    });
+    const quill = new Quill("#editor", { theme: "snow" });
+
     document.querySelector("#blogForm").addEventListener("submit", (e) => {
-      let editorContent = document.querySelector(".ql-editor").innerHTML;
+      const editorContent = document.querySelector(".ql-editor").innerHTML;
       document.querySelector("#hiddenContent").value = editorContent;
-    })
+    });
   </script>
+
+  <!-- Theme toggle -->
   <script>
     const html = document.documentElement;
     const themeRadios = document.querySelectorAll('input[name="themeRadios"]');
 
-    // --- Helper: Get cookie by name ---
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       return match ? match[2] : null;
     }
 
-    // --- Step 1: Apply theme from PHP cookie on load ---
-    const savedTheme = getCookie('_theme') || 'dark'; // default fallback
+    const savedTheme = getCookie('_theme') || 'dark';
     html.setAttribute('data-bs-theme', savedTheme);
 
-    // Check the correct radio button
     const activeRadio = document.querySelector(`input[name="themeRadios"][value="${savedTheme}"]`);
     if (activeRadio) activeRadio.checked = true;
 
-    // --- Step 2: When user switches theme ---
     themeRadios.forEach(radio => {
       radio.addEventListener('change', () => {
         if (radio.checked) {
           const themeValue = radio.value;
-
-          // Apply immediately
           html.setAttribute('data-bs-theme', themeValue);
-
-          // Update cookie (valid for 7 days)
           document.cookie = `_theme=${themeValue}; path=/; max-age=${60 * 60 * 24 * 7}`;
         }
       });
     });
   </script>
 </body>
-
 </html>

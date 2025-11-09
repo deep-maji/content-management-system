@@ -61,7 +61,7 @@ session_start();
     <div class="card-body">
       <p class="card-title">@' . htmlspecialchars($row['author_name']) . '</p>
       <p class="card-text">' . $short_content . '</p>
-      <a href="./showblog.php?id=' . $row['id'] . '" class="btn btn-primary btn-sm">Read More</a>
+      <a href="./showblog.php?id=' . $row['id'] . '" class="btn btn-primary btn-sm">Read More...</a>
     </div>
   </div>';
     }

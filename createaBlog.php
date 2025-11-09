@@ -13,23 +13,25 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
   $author = filter_input(INPUT_POST, "author", FILTER_SANITIZE_SPECIAL_CHARS);
   $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_SPECIAL_CHARS);
-  // $content = filter_input(INPUT_POST, 'content', FILTER_SANITIZE_SPECIAL_CHARS);
   $content = $_POST["content"];
   $content = mysqli_real_escape_string($conn, $content);
   $id = $_SESSION['id'];
 
-  $sql = "INSERT INTO `blog` (`author_id`, `title`, `content`) VALUES ('$id', '$title', '$content')";
+$sql = "INSERT INTO `blog` (`author_id`, `title`, `content`, `created_at`, `update_at`) 
+        VALUES ('$id', '$title', '$content', NOW(), NOW())";
+        
   $result = mysqli_query($conn, $sql);
 
   if ($result) {
     echo "Data Inserted Successfully";
     header("location:index.php");
   } else {
-    echo "error description : " . mysqli_error($conn);
+    echo "Error description: " . mysqli_error($conn);
     header("location:createaBlog.php");
     exit();
   }
 }
+
 
 ?>
 

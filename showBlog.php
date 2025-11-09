@@ -14,27 +14,41 @@ session_start();
 
 <body>
   <?php include('./partials/_nav.php') ?>
+  <?php
+  if (isset($_SESSION['flash_message'])) {
+    echo '<div class="mt-3 alert alert-' . $_SESSION['flash_message_type'] . ' alert-dismissible fade show" role="alert">
+              ' . $_SESSION['flash_message'] . '
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    unset($_SESSION['flash_message']);
+    unset($_SESSION['flash_message_type']);
+  }
+  ?>
   <div class="container-fluid mt-3">
     <?php
-// Assuming connection already exists
-$id = (int) $_GET["id"]; // Prevent SQL injection
-
-$sql = "SELECT blog.*, users.username AS author_name 
+    // Assuming connection already exists
+    $id = (int) $_GET["id"]; // Prevent SQL injection
+    
+    $sql = "SELECT blog.*, users.username AS author_name 
         FROM blog 
         JOIN users ON blog.author_id = users.id 
         WHERE blog.id = $id";
 
-$result = mysqli_query($conn, $sql);
-$row = mysqli_fetch_assoc($result);
+    $result = mysqli_query($conn, $sql);
+    $row = mysqli_fetch_assoc($result);
 
-if ($row) {
-  echo '
+    if ($row) {
+      echo '
     <h4>' . htmlspecialchars($row['title']) . '</h4>
-    <p><b>Author</b>: <i>@' . htmlspecialchars($row['author_name']) . '</i></p>';
+    <p class="text-muted small mb-2"><b>Author</b>: <i>@' . htmlspecialchars($row['author_name']) . '</i></p>
+    <p class="text-muted small mb-2">
+      <b>Created on:</b> ' . date("F j, Y", strtotime($row['created_at'])) . '<br>
+      <b>Last updated:</b> ' . date("F j, Y", strtotime($row['update_at'])) . '
+    </p>';
 
-  // If logged-in user is the author → show edit/delete options
-  if (isset($_SESSION['id']) && $_SESSION['id'] == $row['author_id']) {
-    echo '
+      // If logged-in user is the author → show edit/delete options
+      if (isset($_SESSION['id']) && $_SESSION['id'] == $row['author_id']) {
+        echo '
     <a href="./editBlog.php?id=' . $row['id'] . '" class="btn btn-primary">Edit</a>
     <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal' . $row['id'] . '">Delete Post</button>
 
@@ -56,13 +70,13 @@ if ($row) {
         </div>
       </div>
     </div>';
-  }
+      }
 
-  echo '<hr><div class="content">' . $row['content'] . '</div>';
-} else {
-  echo '<p>Blog not found.</p>';
-}
-?>
+      echo '<hr><div class="content">' . $row['content'] . '</div>';
+    } else {
+      echo '<p>Blog not found.</p>';
+    }
+    ?>
 
   </div>
   <style>

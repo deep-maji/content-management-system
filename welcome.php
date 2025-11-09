@@ -87,6 +87,16 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <body>
   <?php require './partials/_nav.php' ?>
   <?php
+  if (isset($_SESSION['flash_message'])) {
+    echo '<div class="mt-3 alert alert-' . $_SESSION['flash_message_type'] . ' alert-dismissible fade show" role="alert">
+              ' . $_SESSION['flash_message'] . '
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    unset($_SESSION['flash_message']);
+    unset($_SESSION['flash_message_type']);
+  }
+  ?>
+  <?php
   if ($showAlert) {
     echo '<div class="d-flex justify-content-center mt-3"><div class="alert alert-success alert-dismissible fade show col-12 col-sm-12 col-md-5" role="alert">
     ' . $showAlert . '
@@ -218,7 +228,28 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
               </div>
             </div>
           </div>
-          <a class="btn btn-primary" href="./Logout.php">Logout</a>
+          <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+            Logout
+          </a>
+
+          <!-- Logout Confirmation Modal -->
+          <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                  <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                  Are you sure you want to logout from your account?
+                </div>
+                <div class="modal-footer justify-content-center border-0">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <a href="./Logout.php" class="btn btn-danger">Logout</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -260,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             <div class="modal-content border-0 shadow">
               <div class="modal-header border-0">
                 <h5 class="modal-title" id="deleteModalLabel' . $row['id'] . '">Confirm Deletion</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body text-center">
                 Are you sure you want to delete <strong>' . htmlspecialchars($row['title']) . '</strong>?
