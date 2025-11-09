@@ -1,37 +1,45 @@
 <?php
-
 session_start();
 
 if (!isset($_SESSION['id'])) {
-  header("location:index.php");
-  $_SESSION['flash_message'] = "You are not loged in!";
+  $_SESSION['flash_message'] = "You are not logged in!";
   $_SESSION['flash_message_type'] = "danger";
+  header("location:index.php");
   exit;
 }
 
 include("./partials/_dbconnect.php");
 
 $id = (int) $_GET["id"];
-$author_id = $_SESSION['id'];
+$author_id = (int) $_SESSION['id'];
 
-
-$sql = "DELETE from `blog` where `id`=$id AND author_id = $author_id";
+// Perform delete query
+$sql = "DELETE FROM `blog` WHERE `id` = $id AND `author_id` = $author_id";
 $result = mysqli_query($conn, $sql);
 
 if ($result) {
-  if (isset($_SERVER['HTTP_REFERER'])) {
-    header("location:" . $_SERVER['HTTP_REFERER']);
-    $_SESSION['flash_message'] = "Post deleted sucessfully!";
+  if (mysqli_affected_rows($conn) > 0) {
+    // Post successfully deleted
+    $_SESSION['flash_message'] = "Post deleted successfully!";
+    $_SESSION['flash_message_type'] = "success";
+
+    if (isset($_SERVER['HTTP_REFERER'])) {
+      header("location:" . $_SERVER['HTTP_REFERER']);
+    } else {
+      header("location:index.php");
+    }
+  } else {
+    // Post not found or not owned by user
+    $_SESSION['flash_message'] = "You are not the owner of this post!";
     $_SESSION['flash_message_type'] = "danger";
-    exit;
+    header("location:index.php");
   }
-  header("location:index.php");
-  $_SESSION['flash_message'] = "You are not Owner!";
-  $_SESSION['flash_message_type'] = "danger";
 } else {
-  header("location:showBlog.php?id=" . $id);
-  $_SESSION['flash_message'] = "Something worng";
+  // Query failed
+  $_SESSION['flash_message'] = "Something went wrong while deleting the post!";
   $_SESSION['flash_message_type'] = "danger";
+  header("location:showBlog.php?id=" . $id);
 }
 
+exit;
 ?>
