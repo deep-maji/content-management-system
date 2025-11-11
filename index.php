@@ -28,7 +28,7 @@ session_start();
     ?>
 
     <div class="card mt-3">
-      <h5 class="card-header">PHP SUCKS</h5>
+      <h5 class="card-header">PHP</h5>
       <div class="card-body">
         <h5 class="card-title">Special title treatment</h5>
         <button class="btn btn-primary my-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
