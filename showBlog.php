@@ -24,11 +24,11 @@ session_start();
     unset($_SESSION['flash_message_type']);
   }
   ?>
-  <div class="container-fluid mt-3">
+  <div class="container mt-3">
     <?php
     // Assuming connection already exists
     $id = (int) $_GET["id"]; // Prevent SQL injection
-    
+
     $sql = "SELECT blog.*, users.username AS author_name 
         FROM blog 
         JOIN users ON blog.author_id = users.id 
@@ -79,6 +79,7 @@ session_start();
     ?>
 
   </div>
+  <?php include("./partials/footer.html") ?>
   <style>
     .content {
       padding-bottom: 1rem;

@@ -313,6 +313,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     </div>
 
   </div>
+  <?php include("./partials/footer.html") ?>
   <script src="js/script.js"></script>
   <script>
     const html = document.documentElement;

@@ -17,9 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
   $content = mysqli_real_escape_string($conn, $content);
   $id = $_SESSION['id'];
 
-$sql = "INSERT INTO `blog` (`author_id`, `title`, `content`, `created_at`, `update_at`) 
+  $sql = "INSERT INTO `blog` (`author_id`, `title`, `content`, `created_at`, `update_at`) 
         VALUES ('$id', '$title', '$content', NOW(), NOW())";
-        
+
   $result = mysqli_query($conn, $sql);
 
   if ($result) {
@@ -43,7 +43,7 @@ $sql = "INSERT INTO `blog` (`author_id`, `title`, `content`, `created_at`, `upda
 
 <body>
   <?php include('./partials/_nav.php') ?>
-  <div class="container-fluid mt-3">
+  <div class="container mt-3">
     <div class="card shadow-sm">
       <div class="card-body">
         <h3 class="card-title mb-4 text-center">Create a Post</h3>
@@ -75,7 +75,7 @@ $sql = "INSERT INTO `blog` (`author_id`, `title`, `content`, `created_at`, `upda
       </div>
     </div>
   </div>
-
+  <?php include("./partials/footer.html") ?>
   <script src="js/script.js"></script>
   <!-- Include the Quill library -->
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>

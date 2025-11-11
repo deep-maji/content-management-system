@@ -72,7 +72,7 @@ $author = $_SESSION['username'];
 <body>
   <?php include('./partials/_nav.php'); ?>
 
-  <div class="container-fluid mt-3">
+  <div class="container mt-3">
     <div class="card shadow-sm">
       <div class="card-body">
         <h3 class="card-title mb-4 text-center">Update Your Blog</h3>
@@ -100,12 +100,14 @@ $author = $_SESSION['username'];
       </div>
     </div>
   </div>
-
+  <?php include("./partials/footer.html") ?>
   <script src="js/script.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
   <script>
-    const quill = new Quill("#editor", { theme: "snow" });
+    const quill = new Quill("#editor", {
+      theme: "snow"
+    });
 
     document.querySelector("#blogForm").addEventListener("submit", (e) => {
       const editorContent = document.querySelector(".ql-editor").innerHTML;
@@ -140,4 +142,5 @@ $author = $_SESSION['username'];
     });
   </script>
 </body>
+
 </html>

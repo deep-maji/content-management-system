@@ -27,7 +27,7 @@ session_start();
     }
     ?>
 
-    <div class="card mt-3">
+    <!-- <div class="card mt-3">
       <h5 class="card-header">PHP</h5>
       <div class="card-body">
         <h5 class="card-title">Special title treatment</h5>
@@ -39,36 +39,46 @@ session_start();
           <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
         </div>
       </div>
-    </div>
+    </div> -->
     <?php
-
+    // SQL query to get blogs with author name
     $sql = "SELECT blog.*, users.username AS author_name 
-            FROM blog 
-            JOIN users ON blog.author_id = users.id";
+        FROM blog 
+        JOIN users ON blog.author_id = users.id
+        ORDER BY blog.id DESC"; // optional: latest first
 
     $result = mysqli_query($conn, $sql);
 
-    while ($row = mysqli_fetch_assoc($result)) {
-      $content = $row['content'];
-      $short_content = substr($content, 0, 150); // show first 150 characters
-      if (strlen($content) > 150) {
-        $short_content .= '...';
-      }
+    // Check if there are any blogs
+    if (mysqli_num_rows($result) > 0) {
+      while ($row = mysqli_fetch_assoc($result)) {
+        $content = $row['content'];
+        $short_content = substr($content, 0, 150); // show first 150 characters
+        if (strlen($content) > 150) {
+          $short_content .= '...';
+        }
 
+        echo '
+    <div class="card mt-3 shadow-sm">
+      <h5 class="card-header">' . htmlspecialchars($row['title']) . '</h5>
+      <div class="card-body">
+        <p class="card-title text-muted">@' . htmlspecialchars($row['author_name']) . '</p>
+        <p class="card-text">' . $short_content . '</p>
+        <a href="./showblog.php?id=' . $row['id'] . '" class="btn btn-primary btn-sm">Read More...</a>
+      </div>
+    </div>';
+      }
+    } else {
+      // If no blogs found
       echo '
-  <div class="card mt-3">
-    <h5 class="card-header">' . htmlspecialchars($row['title']) . '</h5>
-    <div class="card-body">
-      <p class="card-title">@' . htmlspecialchars($row['author_name']) . '</p>
-      <p class="card-text">' . $short_content . '</p>
-      <a href="./showblog.php?id=' . $row['id'] . '" class="btn btn-primary btn-sm">Read More...</a>
-    </div>
+  <div class="alert alert-light mt-3 text-center" role="alert">
+    No blogs found.
   </div>';
     }
-
-
     ?>
+
   </div>
+  <?php include("./partials/footer.html") ?>
   <style>
     .ql-code-block-container {
       background-color: black !important;
